@@ -1,0 +1,38 @@
+{
+  "name": "extractia-wp",
+  "version": "1.0.0",
+  "description": "ExtractIA WordPress Plugin — JS tests",
+  "private": true,
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "setupFiles": [
+      "./tests/jest/setup.js"
+    ],
+    "testMatch": [
+      "**/tests/jest/**/*.test.js"
+    ],
+    "collectCoverageFrom": [
+      "public/js/**/*.js"
+    ],
+    "coverageThreshold": {
+      "global": {
+        "lines": 70,
+        "functions": 70,
+        "branches": 60
+      }
+    },
+    "coverageDirectory": "tests/coverage/jest",
+    "moduleNameMapper": {
+      "\\.(css)$": "<rootDir>/tests/jest/__mocks__/styleMock.js"
+    }
+  },
+  "devDependencies": {
+    "jest": "^29.0.0",
+    "jest-environment-jsdom": "^29.0.0"
+  }
+}

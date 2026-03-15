@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<phpunit
+    bootstrap="tests/phpunit/bootstrap.php"
+    colors="true"
+    verbose="true"
+    stopOnFailure="false"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="vendor/phpunit/phpunit/phpunit.xsd"
+>
+    <testsuites>
+        <testsuite name="Unit">
+            <directory>tests/phpunit/unit</directory>
+        </testsuite>
+        <testsuite name="Integration">
+            <directory>tests/phpunit/integration</directory>
+        </testsuite>
+    </testsuites>
+
+    <coverage>
+        <include>
+            <directory suffix=".php">includes</directory>
+        </include>
+        <exclude>
+            <file>includes/class-blocks.php</file>
+        </exclude>
+        <report>
+            <html outputDirectory="tests/coverage/html"/>
+            <text outputFile="tests/coverage/coverage.txt" showUncoveredFiles="true"/>
+        </report>
+    </coverage>
+
+    <php>
+        <const name="EXTRACTIA_TESTING" value="true"/>
+        <const name="ABSPATH" value="/var/www/html/"/>
+        <const name="EXTRACTIA_VERSION" value="1.0.0"/>
+        <const name="EXTRACTIA_PLUGIN_DIR" value=""/>
+        <const name="EXTRACTIA_PLUGIN_URL" value="https://example.com/wp-content/plugins/extractia-wp/"/>
+        <const name="EXTRACTIA_API_BASE" value="https://api.extractia.info/api/public"/>
+        <const name="EXTRACTIA_OPTION_KEY" value="extractia_api_key"/>
+    </php>
+</phpunit>

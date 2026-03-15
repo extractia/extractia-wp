@@ -1,0 +1,194 @@
+/* ExtractIA WordPress Plugin — Admin Styles
+   Scope: .wrap.extractia-admin and block editor sidebar */
+
+/* ── Variables ───────────────────────────────────────────────────────────────── */
+:root {
+    --ext-primary:   #4f46e5;
+    --ext-success:   #00a32a;
+    --ext-warning:   #dba617;
+    --ext-danger:    #d63638;
+    --ext-border:    #ddd;
+    --ext-radius:    6px;
+    --ext-card-bg:   #fff;
+    --ext-text:      #1e1e1e;
+    --ext-muted:     #666;
+}
+
+/* ── Dashboard grid ──────────────────────────────────────────────────────────── */
+.extractia-dashboard-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.extractia-card--full {
+    grid-column: 1 / -1;
+}
+
+/* ── Card ────────────────────────────────────────────────────────────────────── */
+.extractia-card {
+    background: var(--ext-card-bg);
+    border: 1px solid var(--ext-border);
+    border-radius: var(--ext-radius);
+    padding: 16px 20px;
+    box-sizing: border-box;
+}
+
+.extractia-card__title {
+    margin: 0 0 12px;
+    font-size: 1rem;
+    color: var(--ext-text);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+/* ── Info table ──────────────────────────────────────────────────────────────── */
+.extractia-info-table {
+    border-collapse: collapse;
+    width: 100%;
+    font-size: 0.9rem;
+}
+.extractia-info-table th,
+.extractia-info-table td {
+    padding: 5px 8px;
+    vertical-align: top;
+    border-bottom: 1px solid #f0f0f0;
+}
+.extractia-info-table th {
+    font-weight: 600;
+    color: var(--ext-muted);
+    width: 130px;
+    white-space: nowrap;
+}
+
+/* ── Badge ───────────────────────────────────────────────────────────────────── */
+.extractia-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 20px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    background: #e0e0e0;
+    color: #333;
+}
+.extractia-badge--active     { background: #d7f7e0; color: var(--ext-success); }
+.extractia-badge--suspended  { background: #fde8e8; color: var(--ext-danger); }
+.extractia-badge--processing { background: #fff3cd; color: var(--ext-warning); }
+.extractia-badge--done       { background: #d7f7e0; color: var(--ext-success); }
+.extractia-badge--error      { background: #fde8e8; color: var(--ext-danger); }
+
+/* ── Usage bar ───────────────────────────────────────────────────────────────── */
+.extractia-usage-bar {
+    background: #e0e0e0;
+    border-radius: 4px;
+    height: 8px;
+    overflow: hidden;
+}
+.extractia-usage-bar__fill {
+    height: 8px;
+    border-radius: 4px;
+    background: var(--ext-success);
+    transition: width 0.4s ease;
+}
+
+/* ── Permissions pill list ───────────────────────────────────────────────────── */
+.extractia-perm {
+    display: inline-block;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-size: 0.72rem;
+    margin: 2px 2px 2px 0;
+}
+.extractia-perm--on  { background: #d7f7e0; color: #1a7a3a; }
+.extractia-perm--off { background: #f0f0f0; color: #bbb; text-decoration: line-through; }
+
+/* ── Row states ──────────────────────────────────────────────────────────────── */
+.extractia-row--suspended td { opacity: 0.55; }
+
+/* ── Links list ──────────────────────────────────────────────────────────────── */
+.extractia-links {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+.extractia-links li {
+    padding: 6px 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+.extractia-links li:last-child { border-bottom: none; }
+.extractia-links a { text-decoration: none; font-size: 0.9rem; }
+.extractia-links a:hover { text-decoration: underline; }
+
+/* ── Warning notice inside card ─────────────────────────────────────────────── */
+.extractia-warn {
+    background: #fff8e1;
+    border-left: 3px solid var(--ext-warning);
+    padding: 6px 10px;
+    font-size: 0.85rem;
+    margin: 8px 0 0;
+    border-radius: 0 4px 4px 0;
+}
+
+/* ── OCR Tools admin grid ────────────────────────────────────────────────────── */
+.extractia-ocr-admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 16px;
+    margin-top: 20px;
+}
+.extractia-ocr-card .extractia-dropzone--sm {
+    border: 2px dashed #ccc;
+    border-radius: 6px;
+    padding: 16px;
+    text-align: center;
+    cursor: pointer;
+    color: #666;
+    transition: border-color 0.2s;
+    margin-top: 12px;
+}
+.extractia-ocr-card .extractia-dropzone--sm:hover,
+.extractia-ocr-card .extractia-dropzone--sm.dragover {
+    border-color: var(--ext-primary);
+    color: var(--ext-primary);
+}
+.extractia-admin-preview-wrap img {
+    max-width: 100%;
+    max-height: 180px;
+    border-radius: 4px;
+    margin-top: 8px;
+    display: block;
+}
+.extractia-ocr-card__prompt {
+    font-size: 0.85rem;
+    color: var(--ext-muted);
+    border-left: 3px solid #e0e0e0;
+    padding-left: 8px;
+    margin: 8px 0;
+}
+.notice-spinner {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    border: 3px solid #ddd;
+    border-top-color: var(--ext-primary);
+    border-radius: 50%;
+    animation: extractia-spin 0.7s linear infinite;
+    margin-top: 8px;
+}
+
+@keyframes extractia-spin {
+    to { transform: rotate(360deg); }
+}
+
+/* ── Table generic ───────────────────────────────────────────────────────────── */
+.extractia-table {
+    font-size: 0.88rem;
+}
+.extractia-table th,
+.extractia-table td {
+    vertical-align: middle;
+}
