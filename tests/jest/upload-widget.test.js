@@ -19,6 +19,10 @@ beforeEach(() => {
   jest.clearAllMocks();
   document.body.innerHTML = "";
   global.fetch = jest.fn();
+  global.fetch.mockResolvedValue({
+    ok: true,
+    json: () => Promise.resolve({ documentsUsed: 0, documentsLimit: 100 }),
+  });
 });
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
@@ -89,6 +93,32 @@ function loadWidget() {
   document.dispatchEvent(new Event("DOMContentLoaded"));
 }
 
+async function addValidImageViaInput(widget) {
+  const fileInput = widget.querySelector(".extractia-file-input");
+  const frSpy = jest.spyOn(global, "FileReader").mockImplementation(() => {
+    const mockFR = { onload: null, onerror: null, readAsDataURL: jest.fn() };
+    setTimeout(
+      () =>
+        mockFR.onload?.({
+          target: { result: "data:image/jpeg;base64,abc" },
+        }),
+      0,
+    );
+    return mockFR;
+  });
+
+  const file = new File([new ArrayBuffer(64)], "ok.jpg", {
+    type: "image/jpeg",
+  });
+  Object.defineProperty(fileInput, "files", {
+    value: [file],
+    configurable: true,
+  });
+  fileInput.dispatchEvent(new Event("change"));
+  await new Promise((r) => setTimeout(r, 0));
+  frSpy.mockRestore();
+}
+
 // ── Initialisation ────────────────────────────────────────────────────────────
 
 describe("Widget initialisation", () => {
@@ -145,11 +175,11 @@ describe("File validation", () => {
     expect(banner.style.display).toBe("block");
   });
 
-  test("accepts JPEG within size limit", () => {
+  test("accepts JPEG within size limit", async () => {
     const w = makeWidget();
     // Mock FileReader
     const mockFR = { onload: null, onerror: null, readAsDataURL: jest.fn() };
-    jest.spyOn(global, "FileReader").mockImplementation(() => {
+    const frSpy = jest.spyOn(global, "FileReader").mockImplementation(() => {
       setTimeout(
         () =>
           mockFR.onload?.({ target: { result: "data:image/jpeg;base64,abc" } }),
@@ -164,8 +194,10 @@ describe("File validation", () => {
     });
     Object.defineProperty(fi, "files", { value: [f], configurable: true });
     fi.dispatchEvent(new Event("change"));
+    await new Promise((r) => setTimeout(r, 0));
     const banner = w.querySelector(".extractia-error-banner");
     expect(banner.style.display).not.toBe("block");
+    frSpy.mockRestore();
   });
 });
 
@@ -195,41 +227,33 @@ describe("Pages strip", () => {
 
 describe("REST process", () => {
   test("calls /process endpoint on button click", async () => {
-    mockFetchOk([
-      {
-        url: "/extractia/v1/usage",
-        data: { documentsUsed: 5, documentsLimit: 100 },
-      },
-    ]);
-
     const doc = { id: "doc-1", data: { total: "99.00", vendor: "ACME" } };
     const w = makeWidget();
     loadWidget();
 
-    // Inject state directly via ExtractIA.initWidget re-run
-    // Simulate: 1 image already in state by dispatching to proc btn via fetch mock
-    const processBtn = w.querySelector(".extractia-process-btn");
-    processBtn.disabled = false;
+    await addValidImageViaInput(w);
 
-    // Mock: first fetch = process, second = usage
+    const processBtn = w.querySelector(".extractia-process-btn");
+
     mockFetchOk(doc);
-    mockFetchOk({ documentsUsed: 11, documentsLimit: 100 });
 
     processBtn.dispatchEvent(new Event("click"));
     await Promise.resolve();
     await Promise.resolve();
 
-    expect(global.fetch).toHaveBeenCalledWith(
-      expect.stringContaining("/process"),
-      expect.objectContaining({ method: "POST" }),
-    );
+    expect(
+      global.fetch.mock.calls.some(
+        ([url, options]) =>
+          String(url).includes("/process") && options?.method === "POST",
+      ),
+    ).toBe(true);
   });
 
   test("shows error banner on 402 quota exceeded", async () => {
     const w = makeWidget();
     loadWidget();
+    await addValidImageViaInput(w);
     const processBtn = w.querySelector(".extractia-process-btn");
-    processBtn.disabled = false;
 
     mockFetchError(402, {
       error: "Quota exceeded",
@@ -248,8 +272,8 @@ describe("REST process", () => {
   test("shows error banner on 429 rate limited", async () => {
     const w = makeWidget();
     loadWidget();
+    await addValidImageViaInput(w);
     const processBtn = w.querySelector(".extractia-process-btn");
-    processBtn.disabled = false;
 
     mockFetchError(429, {
       error: "Rate limited",
@@ -276,11 +300,10 @@ describe("Results rendering", () => {
     };
     const w = makeWidget();
     loadWidget();
+    await addValidImageViaInput(w);
     const processBtn = w.querySelector(".extractia-process-btn");
-    processBtn.disabled = false;
 
     mockFetchOk(doc);
-    mockFetchOk({ documentsUsed: 5, documentsLimit: 100 });
 
     processBtn.dispatchEvent(new Event("click"));
     await new Promise((r) => setTimeout(r, 20));
@@ -296,12 +319,11 @@ describe("Results rendering", () => {
     const doc = { id: "doc-sum", data: { total: "10.00" } };
     const w = makeWidget({ "data-show-summary": "true" });
     loadWidget();
+    await addValidImageViaInput(w);
 
     mockFetchOk(doc);
-    mockFetchOk({ documentsUsed: 1, documentsLimit: 100 });
 
     const processBtn = w.querySelector(".extractia-process-btn");
-    processBtn.disabled = false;
     processBtn.dispatchEvent(new Event("click"));
     await new Promise((r) => setTimeout(r, 20));
 
@@ -315,22 +337,23 @@ describe("Results rendering", () => {
 
 describe("Copy JSON", () => {
   test("calls navigator.clipboard.writeText with JSON", async () => {
+    const writeText = jest.fn().mockResolvedValue();
+    Object.assign(navigator, { clipboard: { writeText } });
     const doc = { id: "doc-cp", data: { total: "77.00" } };
     const w = makeWidget();
     loadWidget();
+    await addValidImageViaInput(w);
 
     const processBtn = w.querySelector(".extractia-process-btn");
-    processBtn.disabled = false;
     mockFetchOk(doc);
-    mockFetchOk({ documentsUsed: 1, documentsLimit: 100 });
     processBtn.dispatchEvent(new Event("click"));
     await new Promise((r) => setTimeout(r, 20));
 
     w.querySelector(".extractia-copy-btn").dispatchEvent(new Event("click"));
     await Promise.resolve();
-
-    // clipboard.writeText should have been called with valid JSON
-    // (only runs if lastDoc is set)
+    expect(writeText).toHaveBeenCalledWith(
+      expect.stringContaining('"total": "77.00"'),
+    );
   });
 });
 
